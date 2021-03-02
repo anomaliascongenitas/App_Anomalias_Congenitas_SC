@@ -1,25 +1,10 @@
+options(OutDec= ",") #Muda de ponto para virgula nos decimais! 
 
 server <- function(input, output,session) {
     
-     
-    
   #callModule(profvis_server, "profiler") ### função para monitorar o desempenho do aplicativo
   
-  ###### Base de dados reativas ############################
-  
- 
-  
-  
-  
-  output$input_quadradinhos_html <- renderUI({ 
-    
-    teste <- dataset_anomalia_analise_ano_filtro()  %>%
-      select(NOMEMUN,numero_nascidos_vivos)
-    
-    teste2 <- teste %>%
-      slice_max(numero_nascidos_vivos,n = 20) %>%
-      select(NOMEMUN)
-    
+   output$input_quadradinhos_html <- renderUI({ 
     
     selectizeInput("input_quadradinhos",
                    label = "Escolha o(s) município(s)",
@@ -85,14 +70,6 @@ server <- function(input, output,session) {
                    selected = teste2$NOMEMUN)
   })
   
-  
-  
-  
-  
-  
-  
-  
-  
 
     rowCallback <- c(
       "function(row, data){",
@@ -108,7 +85,7 @@ server <- function(input, output,session) {
 
     source("arquivos_server/box.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
     source("arquivos_server/bancos_reativos.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
-    
+
     source("arquivos_server/aba_mapa_cid.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
     source("arquivos_server/aba_mapa_prevalencia.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
     source("arquivos_server/aba_mapa_casos.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)

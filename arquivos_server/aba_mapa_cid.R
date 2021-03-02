@@ -20,7 +20,7 @@ output$grafico_mapa_proporcao_cid <- renderLeaflet({
             terceira_parte_escala
           )
         ))
-      pal <- colorBin("plasma", domain = dataset$variavel, bins = escala)
+      pal <- colorBin("plasma", domain = dataset$variavel, bins = escala) ## usar na.color
       #"YlOrRd"
       pal2 <- function(x) {
         ifelse(x == 0, "#808080", pal(x))
@@ -78,22 +78,24 @@ output$grafico_mapa_proporcao_cid <- renderLeaflet({
         c(round(min(dataset$variavel), 0) - 1, round(max(dataset$variavel), 0) +
             1)
       
-      pal <- colorBin("plasma",domain = dataset$variavel, bins = seq(limites[1], limites[2], length.out = 6))
-      pal2 <- function(x) {
-        ifelse(x == 0, "#808080", pal(x))
-      }
+      pal <- colorBin("plasma",domain = dataset$variavel, bins = seq(limites[1], limites[2], length.out = 6)) 
+
+      
+      
       tidy <- dataset %>%
         merge(macro_saude_shape,
               by.x = c("cod"),
-              by.y = c("macroregiao_num"))
-      tidy = st_as_sf(tidy)
+              by.y = c("macroregiao_num") ) 
       
-      tidy <- tidy %>% st_set_crs(4326) %>% st_transform()
+      
+      tidy = st_as_sf(tidy) #%>% st_set_crs("+init=epsg:4326")
+      
+      tidy <- st_transform(tidy,"+init=epsg:4326")
       
       leaflet(tidy) %>%
         addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
         addPolygons(
-          fillColor = ~ pal(variavel),
+          fillColor = ~pal(variavel),
           weight = 1.5,
           opacity = 0.7,
           fillOpacity = 0.7,
@@ -102,6 +104,7 @@ output$grafico_mapa_proporcao_cid <- renderLeaflet({
             weight = 5,
             color = "#666",
             fillOpacity = 0.7,
+            opacity = 0.7,
             bringToFront = TRUE
           ),
           label = sprintf(
@@ -116,7 +119,7 @@ output$grafico_mapa_proporcao_cid <- renderLeaflet({
           labelOptions = labelOptions(
             style = list("font-weight" = "normal", padding = "6px 11px"),
             textsize = "13px",
-            opacity = 0.75,
+            opacity = 0.7,
             direction = "bottom"
           )
         ) %>%
@@ -252,31 +255,25 @@ output$plot_area_chart_cid <- renderPlotly({
       group_by(cid,ANO_NASC) %>%
       summarise(nascidos_vivos_anomalia = n())
     
-    
-    
     myLevels <- banco %>%
       group_by(cid) %>%
       summarise(nascidos_vivos_anomalia = sum(nascidos_vivos_anomalia)) %>%
       arrange(nascidos_vivos_anomalia)
     
-    banco$cid <- factor(banco$cid , levels=myLevels$cid )
+    banco$cid <- factor(banco$cid, levels=myLevels$cid )
     
-    #banco$ANO_NASC <- as.numeric(banco$ANO_NASC)
+    banco$ANO_NASC <- as.numeric(banco$ANO_NASC)
     
     
     banco <- banco %>%
       select(CID = cid,ano_nascimento = ANO_NASC,nascidos_vivos_anomalia = nascidos_vivos_anomalia)
-    
-    
-    
-    
-    
-    p <- ggplot(banco, aes(x=ano_nascimento, y=nascidos_vivos_anomalia, fill=CID)) + 
-      geom_area(alpha=1 , size=.5, colour="white") +
+
+    p <- ggplot(banco) + 
+      geom_area(aes(x=ano_nascimento, y=nascidos_vivos_anomalia, fill=CID),alpha=1 , size=.5,colour="white") +
       scale_fill_viridis(discrete = T,direction = -1) +
       theme_ipsum() +
       labs(x="Ano nascimento",y="Número de Nascidos vivos com anomalia") +
-      scale_x_continuous(breaks=2010:2019,labels=2010:2019)
+      scale_x_continuous(breaks = 2010:2019,labels = 2010:2019)
     
     ggplotly(p)
   }
@@ -296,7 +293,7 @@ output$tabela_cid_1 <- renderDataTable({
   aux <- datasetInputcid_min()
   aux[,2:11] <- round(aux[,2:11],3)
   
-  aux %>%
+  aux2 <- aux %>%
     datatable(
       rownames = F,
       # filter = "top",
@@ -308,7 +305,9 @@ output$tabela_cid_1 <- renderDataTable({
         #paging = FALSE
       )
     )%>%
-    formatCurrency(6,' ', digits = 3, interval = 3, mark = "", dec.mark = ",")
+    formatCurrency(2:11,' ', digits = 3, interval = 3, mark = "", dec.mark = ",")
+  
+    return(aux2)
 })
 
 
@@ -320,6 +319,7 @@ output$downloadData_cid_2 <- downloadHandler(
     write.csv( datasetInputcid() ,file)
   }
 )
+
 output$tabela_cid_2 <- renderDataTable({
   
   datasetInputcid() %>%

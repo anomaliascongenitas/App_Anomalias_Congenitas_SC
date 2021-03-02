@@ -7,7 +7,6 @@ library(readxl)
 #library(dygraphs)
 #library(xts)
 #library(ggrepel)
-
 library(shiny)
 library(shinydashboard)
 library(shinydashboardPlus)
@@ -28,6 +27,8 @@ library(viridis)
 library(ggbeeswarm)
 
 
+
+
 options(OutDec= ",") #Muda de ponto para virgula nos decimais! 
 
 
@@ -41,14 +42,13 @@ localarquivo <- function(x){
 
 
 
-banco_nascimentos <- utils::read.csv2(localarquivo("nascidos_vivos_sc.csv")) %>%
-  rename(numero_nascidos_vivos = nascidos_vivos) %>%
-  filter(CODMUNRES != 420000) %>%
-  replace_na(list(numero_nascidos_vivos = 0))
+banco_nascimentos <- utils::read.csv(localarquivo("nascidos_vivos_sc.csv"),fileEncoding = "UTF-8") 
 
-banco_cid <- utils::read.csv(file= localarquivo("banco_anomalias_2010-2019_sc.csv")) %>%
-  rename(ANO_NASC = ANONASC)
 
+
+
+
+banco_cid <- utils::read.csv(file= localarquivo("banco_anomalias_2010-2019_sc.csv"),fileEncoding = "UTF-8") 
 
 
 banco_aux <- banco_cid %>%
@@ -150,7 +150,7 @@ banco_macro_saude <- read.csv(localarquivo("sc_divisao_macro_saude.csv")) %>%
 banco_macro_saude$IBGE <- substring(banco_macro_saude$IBGE,1,6)
 
 
-macro_saude_shape <- sf::st_read(localarquivo("shapefiles/macro_saude_sc/macro_saude_sc2.shp"), quiet = TRUE) 
+macro_saude_shape <- sf::st_read(localarquivo("shapefiles/macro_saude_sc/macro_saude_sc6.shp"), quiet = TRUE) 
 macro_saude_shape <- macro_saude_shape %>%
   select(macroregiao = Secondary,macroregiao_num = Primary.ID,geometry)
 macro_saude_shape$macroregiao_num <- c(6,7,2,1,5,3,4)

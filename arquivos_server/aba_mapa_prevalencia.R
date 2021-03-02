@@ -59,23 +59,27 @@ output$grafico_mapa_proporcao <- renderLeaflet({
                 prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4) %>%
       ungroup() 
     
-    names(dataset)[1] = "Nome"
-    names(dataset)[4] = "variavel"
+    aux <- datasetInputcid_macro_saude()
+    names(aux)[5] = "Nome"
+    names(aux)[4] = "variavel"
+    names(aux)[1] = "cod"
+    dataset <- aux
+    limites <-
+      c(round(min(dataset$variavel), 0) - 1, round(max(dataset$variavel), 0) +
+          1)
     
-    limites <- c(round(min(dataset$variavel),0)-1,round(max(dataset$variavel),0)+1)
-    
-    pal <- colorBin("plasma", domain = dataset$variavel, bins = seq(limites[1],limites[2],length.out = 6))
-    
-    pal2 <- function(x){
-      ifelse(x==0,"#808080",pal(x))
+    pal <- colorBin("plasma",domain = dataset$variavel, bins = seq(limites[1], limites[2], length.out = 6),alpha = 0.5)
+    pal2 <- function(x) {
+      ifelse(x == 0, "#808080", pal(x))
     }
-    #########################################################################################
-    #### MAPA  
-    #########################################################################################
     tidy <- dataset %>%
-      merge(macro_saude_shape,by.x = c("Nome"), by.y = c("macroregiao"))  
-    tidy = st_as_sf(tidy)
-    tidy <- st_transform(tidy, "+init=epsg:4326") ##leaflet
+      merge(macro_saude_shape,
+            by.x = c("cod"),
+            by.y = c("macroregiao_num"))
+    tidy = st_as_sf(tidy) %>% st_set_crs(4326)
+    
+    tidy <- st_transform( tidy,"+init=epsg:4326")
+    
     
     leaflet(tidy) %>%
       addProviderTiles(providers$OpenStreetMap.Mapnik) %>%

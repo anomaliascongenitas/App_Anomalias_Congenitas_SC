@@ -1,0 +1,13 @@
+name: ac_sc
+title: ac_sc
+username:
+account: projetoanomaliascongenitas
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3716137
+bundleId: 4291680
+url: https://projetoanomaliascongenitas.shinyapps.io/ac_sc/
+when: 1614710979.3425
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: banco_manipulacao.R|I_de_moran_gerando_estatisticas.R|macro_saude_testes.R|pacotes.R|README.md|scan_app.R
