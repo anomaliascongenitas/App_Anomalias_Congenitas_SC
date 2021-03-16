@@ -70,27 +70,24 @@ output$grafico_mapa_proporcao_cid <- renderLeaflet({
         addScaleBar(position = 'bottomleft')
     } else{
       aux <- datasetInputcid_macro_saude()
-      names(aux)[5] = "Nome"
-      names(aux)[4] = "variavel"
+      names(aux)[2] = "Nome"
+      names(aux)[5] = "variavel"
       names(aux)[1] = "cod"
       dataset <- aux
       limites <-
         c(round(min(dataset$variavel), 0) - 1, round(max(dataset$variavel), 0) +
             1)
       
-      pal <- colorBin("plasma",domain = dataset$variavel, bins = seq(limites[1], limites[2], length.out = 6)) 
-
-      
-      
+      pal <- colorBin("plasma",domain = dataset$variavel, bins = seq(limites[1], limites[2], length.out = 6))
+      pal2 <- function(x) {
+        ifelse(x == 0, "#808080", pal(x))
+      }
       tidy <- dataset %>%
-        merge(macro_saude_shape,
-              by.x = c("cod"),
-              by.y = c("macroregiao_num") ) 
+        left_join(macro_saude_shape,
+                  by = c("cod" = "macro_cod"))
+      tidy = st_as_sf(tidy)
       
-      
-      tidy = st_as_sf(tidy) #%>% st_set_crs("+init=epsg:4326")
-      
-      tidy <- st_transform(tidy,"+init=epsg:4326")
+      tidy <- tidy %>%  st_transform()
       
       leaflet(tidy) %>%
         addProviderTiles(providers$OpenStreetMap.Mapnik) %>%

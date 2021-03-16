@@ -143,34 +143,39 @@ tabela_box <- banco_anomalias_analise %>%
 
 
 
-banco_macro_saude <- read.csv(localarquivo("sc_divisao_macro_saude.csv")) %>%
-  rename(macrorregiao = macro)
+# banco_macro_saude <- utils::read.csv(localarquivo("sc_divisao_macro_saude.csv")) %>%
+#   rename(macrorregiao = macro)
+
+banco_macro_saude <- utils::read.csv(localarquivo("sc_divisao_macro_saude2.csv"),fileEncoding = "UTF-8") 
+
+
+#utils::write.csv(banco_macro_saude,localarquivo("sc_divisao_macro_saude2.csv"),fileEncoding = "UTF-8",row.names = FALSE)
 
 
 banco_macro_saude$IBGE <- substring(banco_macro_saude$IBGE,1,6)
 
 
-macro_saude_shape <- sf::st_read(localarquivo("shapefiles/macro_saude_sc/macro_saude_sc6.shp"), quiet = TRUE) 
-macro_saude_shape <- macro_saude_shape %>%
-  select(macroregiao = Secondary,macroregiao_num = Primary.ID,geometry)
-macro_saude_shape$macroregiao_num <- c(6,7,2,1,5,3,4)
-
-banco_macro_saude_analise_aux <- banco_anomalias_analise  %>%
-  merge(.,banco_macro_saude,by.x=c("CODMUNRES"),by.y = c("IBGE"))
-
-
-banco_macro_saude_analise <- banco_macro_saude_analise_aux  %>%
-  group_by(macro_cod,ANO_NASC) %>%
-  summarise(numero_nascidos_vivos = sum(numero_nascidos_vivos), nascidos_vivos_anomalia = sum(nascidos_vivos_anomalia),
-            prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4,macrorregiao) %>%
-  ungroup() %>%
-  select(macrorregiao = macro_cod,2,3,4,5,macro_label = "macrorregiao")
+macro_saude_shape <- sf::st_read(localarquivo("shapefiles/macro_saude_sc/macro_saude_sc.shp"), quiet = TRUE) 
+# macro_saude_shape <- macro_saude_shape %>%
+#   select(macroregiao = Secondary,macroregiao_num = Primary.ID,geometry)
+# macro_saude_shape$macroregiao_num <- c(6,7,2,1,5,3,4)
+# 
+# banco_macro_saude_analise_aux <- banco_anomalias_analise  %>%
+#   merge(.,banco_macro_saude,by.x=c("CODMUNRES"),by.y = c("IBGE"))
+# 
+# 
+# banco_macro_saude_analise <- banco_macro_saude_analise_aux  %>%
+#   group_by(macro_cod,ANO_NASC) %>%
+#   summarise(numero_nascidos_vivos = sum(numero_nascidos_vivos), nascidos_vivos_anomalia = sum(nascidos_vivos_anomalia),
+#             prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4,macrorregiao = unique(macrorregiao)) %>%
+#   ungroup() %>%
+#   select(macrorregiao = macro_cod,2,3,4,5,macro_label = "macrorregiao")
 
 
 mapa_modelo <- mapa
 
 
-
+names(banco_macro_saude_analise)
 
 load("scan_app.RData")
 

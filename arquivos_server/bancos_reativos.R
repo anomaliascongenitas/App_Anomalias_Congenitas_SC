@@ -101,9 +101,9 @@ datasetInputcid_macro_saude <- reactive({
     merge(.,banco_macro_saude,by.x=c("CODMUNRES"),by.y = c("IBGE"))
   
   banco_aux2 <- banco_aux2 %>%
-    group_by(macro_cod) %>%
+    group_by(macro_cod,macrorregiao) %>%
     summarise(numero_nascidos_vivos = sum(numero_nascidos_vivos), nascidos_vivos_anomalia = sum(nascidos_vivos_anomalia),
-              prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4,macrorregiao) %>%
+              prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4) %>%
     ungroup() 
   banco_aux2
 })

@@ -83,7 +83,8 @@ output$mapa_scan <- renderLeaflet({
   banco$NOMEMUN <- unique(banco_modelo$NOMEMUN)
   banco$municipio  <- str_to_lower(banco$NOMEMUN)
   
-  dataset <- merge(mapa_modelo, banco, by = "municipio", all.y = TRUE)
+  dataset <- merge(mapa_modelo, banco, by = "municipio", all.y = TRUE) %>%
+    arrange(CD_GEOCMU)
   
   names(dataset)[7]=c("variavel")
   pal <- colorBin("plasma", domain =dataset$variavel, bins = seq(0,1,length.out = 7))

@@ -74,9 +74,7 @@ sidebar <- dashboardSidebar(
     menuItem("Mapa nasc. vivos", tabName = "mapa_populacao",icon = icon("globe-americas")),
     menuItem("Série Temp. prevalência ao nascimento", tabName = "serie_prevalencia",icon = icon("chart-line")),
     menuItem("Série Temp. nasc. vivos com anomalia", tabName = "serie_casos",icon = icon("chart-line")),
-    #menuItem("Estatística Scan", tabName = "scan",icon = icon("search-location")),
-    # menuItem("Série Temp. nasc. vivos", tabName = "serie_pop"),
-    # menuItem("Tabela com dados das prevalências", tabName = "tabela"),
+    menuItem("Estatística Scan", tabName = "scan",icon = icon("search-location")),
     menuItem("Sobre", tabName = "sobre",icon = icon("book"))
   ),
   width = 300
@@ -88,7 +86,7 @@ source("arquivos_ui/aba_mapa_casos.R",encoding = "UTF-8",local = TRUE,keep.sourc
 source("arquivos_ui/aba_mapa_populacao.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
 source("arquivos_ui/aba_serie_casos.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
 source("arquivos_ui/aba_serie_prevalencia.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
-#source("arquivos_ui/aba_scan.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
+source("arquivos_ui/aba_scan.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
 source("arquivos_ui/aba_sobre.R",encoding = "UTF-8",local = TRUE,keep.source = TRUE)
 
 
@@ -103,7 +101,7 @@ body <- dashboardBody(
     aba_mapa_populacao,
     aba_serie_casos,
     aba_serie_prevalencia,
-    #aba_scan,
+    aba_scan,
     aba_sobre
   )
 ) 

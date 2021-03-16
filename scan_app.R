@@ -26,30 +26,18 @@ gerar_banco_modelo_aux <- function(cid2){
   
   
   banco_aux2 <- banco_aux2 %>%
-    replace_na(list(nascidos_vivos_anomalia = 0))
-    #mutate(prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4) %>%
-    #select(NOMEMUN = NOMEMUN,numero_nascidos_vivos,nascidos_vivos_anomalia)
-  # 
-  # linha_pinto_bandeira  <- banco_aux2[banco_aux2$NOMEMUN == "Pinto Bandeira",]
-  # num_linha_bento_goncalves <- which(banco_aux2$NOMEMUN == "Bento Gonçalves")
-  # banco_aux2[num_linha_bento_goncalves,4:5] = banco_aux2[num_linha_bento_goncalves,4:5] + linha_pinto_bandeira[,4:5]
-  # 
-  # 
-  # 
-  # 
-  # banco_aux2 <- banco_aux2 %>%
-  #   filter(NOMEMUN != "Pinto Bandeira")
-  # 
+    replace_na(list(nascidos_vivos_anomalia = 0))%>%
+    arrange(CODMUNRES)
+
   
   return(banco_aux2)
 }
 
 
-mapa_modelo <- sf::st_read(localarquivo("shapefiles/sc_municipios/SC_Municipios_2019.shp"), quiet = TRUE) %>%
-  mutate(municipio= str_to_lower(NM_MUN)) %>%
-  select(-SIGLA_UF,-AREA_KM2)
+mapa_modelo <- sf::st_read(localarquivo("shapefiles/sc_municipios/42MUE250GC_SIR.shp"), quiet = TRUE) %>%
+  mutate(municipio= str_to_lower(NM_MUNICIP))
 
-mapa_modelo$CD_MUN <- as.numeric(substring(mapa_modelo$CD_MUN,1,6))
+mapa_modelo$CD_GEOCMU <- as.numeric(substring(mapa_modelo$CD_GEOCMU,1,6))
 
 
 lista_completa <- list()
@@ -60,7 +48,8 @@ lista_completa <- list()
 
 
 for (i in 1:9) {
-  banco_modelo <- gerar_banco_modelo_aux(i)
+  banco_modelo <- gerar_banco_modelo_aux(i)%>%
+    arrange(CODMUNRES)
   
   
   counts <- banco_modelo  %>% 
@@ -68,8 +57,7 @@ for (i in 1:9) {
     df_to_matrix(time_col = "ANO_NASC", location_col = "CODMUNRES", value_col = "nascidos_vivos_anomalia")
   
   
-  # Remove Cibola since cases have been counted towards Valencia. Ideally, this
-  # should be accounted for when creating the zones.
+  
   
   banco_modelo$municipio <- str_to_lower(banco_modelo$NOMEMUN) 
   
@@ -81,8 +69,9 @@ for (i in 1:9) {
  
   
   banco_modelo_mapa <-  banco_modelo_aux %>%
-    left_join(mapa_modelo,by=c("CODMUNRES" = "CD_MUN"))%>%
-    select(-3,-4)
+    left_join(mapa_modelo,by=c("CODMUNRES" = "CD_GEOCMU"))%>%
+    select(-3,-5) %>%
+    rename(municipio = municipio.x)
   
   
   
@@ -96,7 +85,7 @@ for (i in 1:9) {
   g <- inla.read.graph(filename = localarquivo("map.adj"))
   
   
-  
+  banco_modelo_mapa_sf$municipio
   
   proporcao_media <- banco_modelo %>%
     group_by(ANO_NASC) %>%
@@ -108,7 +97,6 @@ for (i in 1:9) {
   
   
   ebp_baselines <- banco_modelo  %>% 
-    #df_to_matrix(value_col = "mu")
     df_to_matrix(time_col = "ANO_NASC", location_col = "CODMUNRES", value_col = "valor_esperado")
   
   
@@ -121,22 +109,14 @@ for (i in 1:9) {
   print(poisson_result)
   
   
+  
+  
+  
+  lista2 <- banco_modelo_mapa %>%
+    filter(CODMUNRES %in% colnames(counts[,c(poisson_result$MLC$zone_number,poisson_result$MLC$locations)])) %>%
+    select(CODMUNRES,municipio = municipio)
+  
 
-  
-  lista2 <- banco_modelo_aux %>%
-    filter(CODMUNRES %in% colnames(counts[,poisson_result$MLC$locations]))
-  
-  lista2
-  
-  
-  
-  lista <- banco_modelo_aux %>%
-    filter(CODMUNRES %in% colnames(counts[,poisson_result$MLC$locations]))
-  
-  
-  
-  
-  
   
   county_scores <- score_locations(poisson_result, g$nbs)
   lista_completa[[i]] <- list(MC_pvalue = poisson_result,cluster = lista2,relative_score = county_scores)

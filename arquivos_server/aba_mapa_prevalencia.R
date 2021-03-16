@@ -54,13 +54,13 @@ output$grafico_mapa_proporcao <- renderLeaflet({
       merge(.,banco_macro_saude,by.x=c("CODMUNRES"),by.y = c("IBGE"))
     
     dataset <- banco_aux2 %>%
-      group_by(macrorregiao) %>%
+      group_by(macro_cod,macrorregiao) %>%
       summarise(numero_nascidos_vivos = sum(numero_nascidos_vivos), nascidos_vivos_anomalia = sum(nascidos_vivos_anomalia),
                 prevalencia = nascidos_vivos_anomalia/numero_nascidos_vivos*10^4) %>%
       ungroup() 
     
-    aux <- datasetInputcid_macro_saude()
-    names(aux)[5] = "Nome"
+    aux <- dataset
+    names(aux)[2] = "Nome"
     names(aux)[4] = "variavel"
     names(aux)[1] = "cod"
     dataset <- aux
@@ -73,12 +73,13 @@ output$grafico_mapa_proporcao <- renderLeaflet({
       ifelse(x == 0, "#808080", pal(x))
     }
     tidy <- dataset %>%
-      merge(macro_saude_shape,
-            by.x = c("cod"),
-            by.y = c("macroregiao_num"))
-    tidy = st_as_sf(tidy) %>% st_set_crs(4326)
+      left_join(macro_saude_shape,
+                by = c("cod" = "macro_cod"))
+    tidy = st_as_sf(tidy)
     
-    tidy <- st_transform( tidy,"+init=epsg:4326")
+    tidy <- tidy %>%  st_transform("+init=epsg:4326")
+    
+    
     
     
     leaflet(tidy) %>%
@@ -95,8 +96,8 @@ output$grafico_mapa_proporcao <- renderLeaflet({
                     bringToFront = TRUE),
                   label = sprintf("<strong>%s</strong><br/>Prevalência ao nascimento:
                                   %s</strong><br/>Número nascidos vivos: %s<br/>Número nascidos vivos com anomalia: %s",
-                                  tidy$Nome, round(tidy$variavel,3), tidy$numero_nascidos_vivos, 
-                                  tidy$nascidos_vivos_anomalia) %>%
+                                  tidy$Nome, round(tidy$prevalencia,3), tidy$numero_nascidos_vivos, 
+                                  tidy$variavel) %>%
                     lapply(htmltools::HTML),
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "6px 11px"),
